@@ -214,4 +214,7 @@ public class Acp implements Serializable {
         this.threshold = threshold;
     }
 
+    public EigenSpace getEigenSpace() {
+        return eigenSpace;
+    }
 }

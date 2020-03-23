@@ -1,25 +1,30 @@
 package sample;
 
 
+import com.github.sarxos.webcam.Webcam;
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXSpinner;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import kernel.Acp;
 import kernel.Result;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -34,16 +39,16 @@ public class Controller implements Initializable {
     private ImageView faceImage;
 
     @FXML
-    private Button trainBtn;
+    private JFXButton trainBtn;
 
     @FXML
     private TextField facePath;
 
     @FXML
-    private Button loadBtn;
+    private JFXButton loadBtn;
 
     @FXML
-    private Button recognizeBtn;
+    private JFXButton recognizeBtn;
 
     @FXML
     private Label result;
@@ -54,9 +59,19 @@ public class Controller implements Initializable {
     @FXML
     private Button saveTrainBtn;
 
+    @FXML
+    private Label eigenfacesNumber;
+
+    @FXML
+    private JFXButton takePic;
+
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {}
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        if (trained){
+            eigenfacesNumber.setText(String.valueOf(pca.getEigenSpace().getDimension()));
+        }
+    }
 
 
     @FXML
@@ -76,6 +91,7 @@ public class Controller implements Initializable {
                 pca.setThreshold(thresholdSlider.getValue());
                 recognition_result = pca.recognize(path_to_orl);
                 result.setText(recognition_result.name());
+
             }
 
             else {
@@ -147,4 +163,47 @@ public class Controller implements Initializable {
         }
     }
 
+
+    // get help in browser
+    public void getHelp(ActionEvent actionEvent) {
+
+        try {
+            Desktop desktop = null;
+            if (Desktop.isDesktopSupported()) {
+                desktop = Desktop.getDesktop();
+            }
+
+            desktop.open(new File("D:\\study\\PCAUI\\AcpGUI\\docs\\index.html"));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+    }
+
+    @FXML
+    void takePicture(ActionEvent event) throws IOException {
+        Parent camera = FXMLLoader.load(getClass().getResource("fxml/webcam.fxml"));
+        Scene scene = new Scene(camera);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.show();
+    }
+
+
+    // take picture section
+    @FXML
+    private Label pictureLabel;
+
+    @FXML
+    void savePicture(ActionEvent event) {
+
+    }
+
+    @FXML
+    void takeCamPicture(ActionEvent event) throws IOException {
+        Webcam webcam = Webcam.getDefault();
+        webcam.open();
+        BufferedImage imageTaken = webcam.getImage();
+        ImageIO.write(imageTaken, "PNG", new File("sample/userPics/image.png"));
+    }
 }

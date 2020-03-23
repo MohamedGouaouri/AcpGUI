@@ -1,0 +1,19 @@
+.leftBtns{
+    -fx-background-color: #237299;
+    -fx-background-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-border-color: #FFFFFF;
+    -fx-border-radius: 10px;
+}
+
+.leftBtns:hover{
+    -fx-cursor: hand;
+}
+
+.loadBtn{
+    -fx-background-color: #237299;
+    -fx-background-radius: 10px;
+}
+.loadBtn:hover{
+    -fx-cursor: hand;
+}
