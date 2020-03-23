@@ -19,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import kernel.Acp;
+import kernel.ImageMat;
 import kernel.Result;
 
 import javax.imageio.ImageIO;
@@ -44,11 +45,6 @@ public class Controller implements Initializable {
     @FXML
     private TextField facePath;
 
-    @FXML
-    private JFXButton loadBtn;
-
-    @FXML
-    private JFXButton recognizeBtn;
 
     @FXML
     private Label result;
@@ -62,10 +58,6 @@ public class Controller implements Initializable {
     @FXML
     private Label eigenfacesNumber;
 
-    @FXML
-    private JFXButton takePic;
-
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         if (trained){
@@ -77,8 +69,8 @@ public class Controller implements Initializable {
     @FXML
     void loadFace(ActionEvent event) {
         try{
-            faceImage.setImage(new Image(facePath.getText()));
-        }catch (IllegalArgumentException e){
+            faceImage.setImage(new Image(new FileInputStream(facePath.getText())));
+        }catch (IllegalArgumentException | FileNotFoundException e){
             alertMsg("Input path must not be empty", Alert.AlertType.ERROR);
         }
     }
@@ -87,11 +79,10 @@ public class Controller implements Initializable {
     void recognize(ActionEvent event) {
         try{
             if (trained){
-                String path_to_orl = "src/"+facePath.getText();
+                String path_to_orl = facePath.getText();
                 pca.setThreshold(thresholdSlider.getValue());
                 recognition_result = pca.recognize(path_to_orl);
                 result.setText(recognition_result.name());
-
             }
 
             else {
@@ -192,18 +183,17 @@ public class Controller implements Initializable {
 
     // take picture section
     @FXML
-    private Label pictureLabel;
-
-    @FXML
-    void savePicture(ActionEvent event) {
-
-    }
+    private ImageView picTaken;
 
     @FXML
     void takeCamPicture(ActionEvent event) throws IOException {
         Webcam webcam = Webcam.getDefault();
         webcam.open();
-        BufferedImage imageTaken = webcam.getImage();
-        ImageIO.write(imageTaken, "PNG", new File("sample/userPics/image.png"));
+        BufferedImage bufferedImageTaken = webcam.getImage();
+        ImageIO.write(bufferedImageTaken, "BMP", new File("src/userPics/image.bmp"));
+        ImageMat.resizeImage("src/userPics/image.bmp");
+        ImageMat.grayscaleImage("src/userPics/image.bmp");
+        picTaken.setImage(new Image(new FileInputStream("src/userPics/image.bmp")));
+        webcam.close();
     }
 }

@@ -9,17 +9,16 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="586.0" style="-fx-background-color: #FFFFFF;" stylesheets="@../assets/css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="586.0" style="-fx-background-color: #FFFFFF;" stylesheets="@../../assets/css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
       <ImageView fitHeight="411.0" fitWidth="395.0" layoutX="210.0" layoutY="-11.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../assets/images/p1.jpg" />
+            <Image url="@../../assets/images/p1.jpg" />
          </image>
       </ImageView>
       <ImageView fitHeight="400.0" fitWidth="237.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../assets/images/p2.jpg" />
+            <Image url="@../../assets/images/p2.jpg" />
          </image>
       </ImageView>
       <JFXButton fx:id="trainBtn" layoutX="-1.0" layoutY="23.0" onAction="#trainModel" prefHeight="47.0" prefWidth="210.0" styleClass="leftBtns" text="Train Model" textFill="WHITE">

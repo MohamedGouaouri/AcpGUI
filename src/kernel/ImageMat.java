@@ -3,9 +3,12 @@ package kernel;
 import javafx.scene.image.Image;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import weka.core.matrix.Matrix;
 
+import java.awt.image.CropImageFilter;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -18,7 +21,6 @@ public class ImageMat implements Serializable {
     public static Mat imageToMatcv(String path) {
         Imgcodecs imgcodecs = new Imgcodecs();
         Mat matrix = imgcodecs.imread(path);
-
         return matrix;
     }
 
@@ -61,4 +63,18 @@ public class ImageMat implements Serializable {
         return matcvToImage(Util.matrixToMatcv(out));
     }
 
+    public static void grayscaleImage(String path){
+        Mat source = imageToMatcv(path);
+        Mat destination = new Mat();
+        Imgproc.cvtColor(source, destination, Imgproc.COLOR_RGB2GRAY);
+        Imgcodecs.imwrite(path, destination);
+    }
+
+    public static void resizeImage(String path){
+        Mat source = imageToMatcv(path);
+        Mat resized = new Mat();
+        Size newSize = new Size(92, 112);
+        Imgproc.resize(source, resized, newSize, Imgproc.INTER_AREA);
+        Imgcodecs.imwrite(path, resized);
+    }
 }
