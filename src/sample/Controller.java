@@ -4,19 +4,22 @@ package sample;
 import com.github.sarxos.webcam.Webcam;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
-import com.jfoenix.controls.JFXSpinner;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import kernel.Acp;
 import kernel.ImageMat;
@@ -27,14 +30,16 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
 
 
-    Acp pca = new Acp(3000);
-    boolean trained = false;
-    Result recognition_result;
+    private static Acp pca = new Acp(3000);
+    private static HashMap<String, Number> distancesMap;
+    private boolean trained = false;
 
     @FXML
     private ImageView faceImage;
@@ -42,9 +47,7 @@ public class Controller implements Initializable {
     @FXML
     private JFXButton trainBtn;
 
-    @FXML
-    private TextField facePath;
-
+    private String facePath;
 
     @FXML
     private Label result;
@@ -56,22 +59,31 @@ public class Controller implements Initializable {
     private Button saveTrainBtn;
 
     @FXML
-    private Label eigenfacesNumber;
+    private JFXButton getStatBtn;
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        if (trained){
-            eigenfacesNumber.setText(String.valueOf(pca.getEigenSpace().getDimension()));
-        }
+
     }
 
 
     @FXML
     void loadFace(ActionEvent event) {
-        try{
-            faceImage.setImage(new Image(new FileInputStream(facePath.getText())));
-        }catch (IllegalArgumentException | FileNotFoundException e){
-            alertMsg("Input path must not be empty", Alert.AlertType.ERROR);
+
+        FileChooser fileChooser = new FileChooser();
+        // TODO: 24/03/2020 Filter selected file
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("BMP", "*.bmp"));
+
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null){
+            try{
+                facePath = selectedFile.getPath();
+                faceImage.setImage(new Image(new FileInputStream(selectedFile.getPath())));
+            }catch (FileNotFoundException e){
+                alertMsg("File not found", Alert.AlertType.ERROR);
+            }
         }
     }
 
@@ -79,18 +91,20 @@ public class Controller implements Initializable {
     void recognize(ActionEvent event) {
         try{
             if (trained){
-                String path_to_orl = facePath.getText();
+                String path_to_orl = facePath;
                 pca.setThreshold(thresholdSlider.getValue());
-                recognition_result = pca.recognize(path_to_orl);
+                Result recognition_result = pca.recognize(path_to_orl);
                 result.setText(recognition_result.name());
+                distancesMap = pca.distancesMap;
             }
 
             else {
                 alertMsg("Model must be trained before recognizing", Alert.AlertType.WARNING);
             }
         }catch (IllegalArgumentException e){
-            alertMsg("You must specify a correct path to the input image\n or image " +
-                    "must have size of 92 x 112", Alert.AlertType.WARNING);
+//            alertMsg("You must specify a correct path to the input image\n or image " +
+//                    "must have size of 92 x 112", Alert.AlertType.WARNING);
+            e.printStackTrace();
         }
     }
 
@@ -195,5 +209,54 @@ public class Controller implements Initializable {
         ImageMat.grayscaleImage("src/userPics/image.bmp");
         picTaken.setImage(new Image(new FileInputStream("src/userPics/image.bmp")));
         webcam.close();
+    }
+
+
+
+    @FXML
+    void showStatistics(ActionEvent event) throws IOException {
+        Parent stat = FXMLLoader.load(getClass().getResource("fxml/statistics.fxml"));
+        Scene scene = new Scene(stat);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.show();
+    }
+
+
+
+    @FXML
+    private Pane chartPane;
+
+    @FXML
+    public void getStatistics(ActionEvent actionEvent){
+        String[] persons = {"PERSON1", "PERSON2","PERSON3","PERSON4","PERSON5","PERSON6", "PERSON7", "PERSON8", "PERSON9", "PERSON10",
+                "PERSON11", "PERSON12","PERSON13","PERSON14","PERSON15","PERSON16", "PERSON17", "PERSON18", "PERSON19", "PERSON20",
+                "PERSON21", "PERSON22","PERSON23","PERSON24","PERSON25","PERSON26", "PERSON27", "PERSON28", "PERSON29", "PERSON30",
+                "PERSON31", "PERSON32","PERSON33","PERSON34","PERSON35","PERSON36", "PERSON37", "PERSON38", "PERSON39", "PERSON40"};
+// populating axis
+        CategoryAxis xAxis = new CategoryAxis();
+
+        NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("Persons");
+        yAxis.setLabel("Distances");
+
+        BarChart barChart = new BarChart(xAxis, yAxis);
+        barChart.setTitle("Distances of the input face");
+
+        //get data
+        XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
+        try{
+
+            for (int i = 0; i < persons.length; i++) {
+                series.getData().add(new XYChart.Data<>(persons[i], distancesMap.get(persons[i])));
+
+            }
+            // add data to bar chart
+            barChart.getData().add(series);
+            barChart.setBarGap(2);
+            chartPane.getChildren().add(barChart);
+        }catch (Exception e){
+            alertMsg("You must make recognition first", Alert.AlertType.WARNING);
+        }
     }
 }

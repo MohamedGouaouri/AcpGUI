@@ -5,7 +5,9 @@ import weka.core.matrix.Matrix;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Acp implements Serializable {
 
@@ -22,6 +24,7 @@ public class Acp implements Serializable {
     private Matrix projectedCenters;
     private Matrix mean;
     private EigenSpace eigenSpace;
+    public HashMap<String, Number> distancesMap = new HashMap<>();
 
 
     public Acp(double threshold){
@@ -36,16 +39,20 @@ public class Acp implements Serializable {
         Matrix total = new Matrix(height * width, directory.listFiles().length * trainImagesNumber);
         int i ;
         int j = 0;
-        File[] images = new File[10];
+        File[] images;
+
         for (File fd : directory.listFiles()) {
+            distancesMap.put(fd.getName(), 0);
             images = fd.listFiles();
             for (i = 0; i < trainImagesNumber; i++) {
+                assert images != null;
                 Matrix mat = ImageMat.imageToVector(images[i].getPath());
 
                 Util.replaceColumn(total,mat,i+j);
             }
             j = j + trainImagesNumber;
         }
+
 
         return total;
     }
@@ -185,15 +192,23 @@ public class Acp implements Serializable {
         }
 
 
-        Iterator<Double> iterator0 = distances.iterator();
-        while (iterator0.hasNext()){
-            System.out.println(iterator0.next());
+
+        Iterator<Double> iterator1 = distances.iterator();
+        int i = 0;
+        File directory = new File(this.path);
+        while (iterator1.hasNext()){
+            double value = iterator1.next();
+            String[] dirList = directory.list();
+            distancesMap.put(dirList[i], value);
+            System.out.println(distancesMap.get(dirList[i]));
+            i++;
+
         }
 
         int foundFaces = 0;
-        Iterator<Double> iterator = distances.iterator();
-        while (iterator.hasNext()){
-            if (iterator.next() <= threshold){
+        Iterator<Double> iterator2 = distances.iterator();
+        while (iterator2.hasNext()){
+            if (iterator2.next() <= threshold){
                 foundFaces++;
             }
         }
@@ -204,6 +219,7 @@ public class Acp implements Serializable {
             return Result.RECONNUE;
         }
         return Result.CONFUSION;
+
     }
 
     public double getThreshold() {
@@ -217,4 +233,6 @@ public class Acp implements Serializable {
     public EigenSpace getEigenSpace() {
         return eigenSpace;
     }
+
+
 }
