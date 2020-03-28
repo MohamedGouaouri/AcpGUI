@@ -4,6 +4,7 @@ package sample;
 import com.github.sarxos.webcam.Webcam;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -59,6 +60,9 @@ public class Controller implements Initializable {
     private Button saveTrainBtn;
 
     @FXML
+    private Button loadBtn;
+
+    @FXML
     private JFXButton getStatBtn;
 
 
@@ -109,16 +113,23 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    void trainModel(ActionEvent event){
-        pca.trainModel();
-        trained = true;
-        trainBtn.setDisable(true);
+    void trainModel(ActionEvent event) {
+        trainBtn.setDisable(true);  //this one should be outside of the thread's run method ! sinon tdir exception psk elle essaye d'accéder au javafx application thread
 
-        alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.CONFIRMATION);
-
+        alertMsg("Model is now training\n" +
+                "This may take about 20 seconds", Alert.AlertType.INFORMATION);
+        new Thread(() -> {
+            pca.trainModel();
+            Platform.runLater(() -> {
+                Controller.alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.CONFIRMATION);
+                trained = true;
+                loadBtn.setDisable(true);
+            });
+        }).start();
     }
 
-    public void alertMsg(String msg, Alert.AlertType type){
+
+    public static void alertMsg(String msg, Alert.AlertType type){
         Alert alert = new Alert(type);
         alert.setTitle("Message");
         alert.setHeaderText(null);
@@ -218,6 +229,8 @@ public class Controller implements Initializable {
         Parent stat = FXMLLoader.load(getClass().getResource("fxml/statistics.fxml"));
         Scene scene = new Scene(stat);
         Stage stage = new Stage();
+        stage.setResizable(false);
+        stage.setTitle("Statistics");
         stage.setScene(scene);
         stage.show();
     }

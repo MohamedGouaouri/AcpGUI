@@ -2,6 +2,8 @@ package kernel;
 //la classe acp
 
 import weka.core.matrix.Matrix;
+import weka.core.matrix.SingularValueDecomposition;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -150,8 +152,9 @@ public class Acp implements Serializable {
         dataSet.minusEquals(Util.fillToDuplicatedMatrix(mean, dataSet.getColumnDimension()));
 
         // calculate the eigenvectors of the covariance matrix
-        Matrix eigenvectors = dataSet.svd().getU();
-        Matrix singularValues = dataSet.svd().getS();
+        SingularValueDecomposition singularValueDecomposition = dataSet.svd();
+        Matrix eigenvectors = singularValueDecomposition.getU();
+        Matrix singularValues = singularValueDecomposition.getS();
         Matrix eigenvalues = Util.squareDiagonal(singularValues);
 
         // the reduced eigenspace dimension
@@ -200,7 +203,6 @@ public class Acp implements Serializable {
             double value = iterator1.next();
             String[] dirList = directory.list();
             distancesMap.put(dirList[i], value);
-            System.out.println(distancesMap.get(dirList[i]));
             i++;
 
         }
