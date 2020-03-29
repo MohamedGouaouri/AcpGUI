@@ -5,7 +5,6 @@ import com.github.sarxos.webcam.Webcam;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +18,12 @@ import javafx.scene.control.Label;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import kernel.Acp;
@@ -31,7 +35,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
@@ -41,6 +44,8 @@ public class Controller implements Initializable {
     private static Acp pca = new Acp(3000);
     private static HashMap<String, Number> distancesMap;
     private boolean trained = false;
+    private int eigenfacesNumber;
+
 
     @FXML
     private ImageView faceImage;
@@ -64,7 +69,6 @@ public class Controller implements Initializable {
 
     @FXML
     private JFXButton getStatBtn;
-
 
 
     @Override
@@ -99,15 +103,19 @@ public class Controller implements Initializable {
                 pca.setThreshold(thresholdSlider.getValue());
                 Result recognition_result = pca.recognize(path_to_orl);
                 result.setText(recognition_result.name());
+                if (recognition_result == Result.RECONNUE) result.setTextFill(Color.web("#00FF00"));
+                if (recognition_result == Result.CONFUSION) result.setTextFill(Color.web("#ffb70f"));
+                if (recognition_result == Result.REJETE) result.setTextFill(Color.web("#FF0000"));
+
                 distancesMap = pca.distancesMap;
             }
 
             else {
                 alertMsg("Model must be trained before recognizing", Alert.AlertType.WARNING);
             }
-        }catch (IllegalArgumentException e){
-//            alertMsg("You must specify a correct path to the input image\n or image " +
-//                    "must have size of 92 x 112", Alert.AlertType.WARNING);
+        }catch (Exception e){
+            alertMsg("You must specify a correct path to the input image\n or image " +
+                    "must have size of 92 x 112", Alert.AlertType.ERROR);
             e.printStackTrace();
         }
     }
@@ -201,6 +209,9 @@ public class Controller implements Initializable {
         Parent camera = FXMLLoader.load(getClass().getResource("fxml/webcam.fxml"));
         Scene scene = new Scene(camera);
         Stage stage = new Stage();
+        stage.setResizable(false);
+        stage.setTitle("Take picture");
+        stage.getIcons().add(new Image(new FileInputStream("src/assets/images/icons/photograph.png")));
         stage.setScene(scene);
         stage.show();
     }
@@ -231,6 +242,7 @@ public class Controller implements Initializable {
         Stage stage = new Stage();
         stage.setResizable(false);
         stage.setTitle("Statistics");
+        stage.getIcons().add(new Image(new FileInputStream("src/assets/images/icons/graph.png")));
         stage.setScene(scene);
         stage.show();
     }
@@ -239,6 +251,7 @@ public class Controller implements Initializable {
 
     @FXML
     private Pane chartPane;
+
 
     @FXML
     public void getStatistics(ActionEvent actionEvent){
@@ -268,8 +281,51 @@ public class Controller implements Initializable {
             barChart.getData().add(series);
             barChart.setBarGap(2);
             chartPane.getChildren().add(barChart);
+            barChart.setStyle("CHART_COLOR_1: rgb(2,0,94);");
         }catch (Exception e){
             alertMsg("You must make recognition first", Alert.AlertType.WARNING);
+            e.printStackTrace();
         }
     }
+
+    @FXML
+    void trainOnMouseClicked(MouseEvent event) {
+        MouseButton mouseButton = event.getButton();
+        if (mouseButton == MouseButton.SECONDARY){
+            getHelp(null);
+        }
+    }
+    @FXML
+    void recognizeOnMouseClicked(MouseEvent event) {
+        MouseButton mouseButton = event.getButton();
+        if (mouseButton == MouseButton.SECONDARY){
+            getHelp(null);
+        }
+    }
+
+    @FXML
+    void saveOnMouseClicked(MouseEvent event) {
+        MouseButton mouseButton = event.getButton();
+        if (mouseButton == MouseButton.SECONDARY){
+            getHelp(null);
+        }
+    }
+    @FXML
+    void loadOnMouseClicked(MouseEvent event) {
+        MouseButton mouseButton = event.getButton();
+        if (mouseButton == MouseButton.SECONDARY){
+            getHelp(null);
+        }
+    }
+
+    @FXML
+    void trainOnKeyPressed(KeyEvent event) {
+        switch (event.getCode()){
+            case T:trainModel(null);break;
+            case R:recognize(null);break;
+            case S:saveTrainState(null);break;
+            case L:loadTrainState(null);break;
+        }
+    }
+
 }
