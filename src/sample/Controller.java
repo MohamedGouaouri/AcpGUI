@@ -197,7 +197,7 @@ public class Controller implements Initializable {
                 desktop = Desktop.getDesktop();
             }
 
-            desktop.open(new File("D:\\study\\PCAUI\\AcpGUI\\docs\\index.html"));
+            desktop.open(new File("D:\\study\\PCAUI\\docs\\index.html"));
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }

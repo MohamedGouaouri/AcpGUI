@@ -11,5 +11,6 @@
     <orderEntry type="library" name="opencv-420" level="application" />
     <orderEntry type="library" name="controlsfx-9.0.0" level="application" />
     <orderEntry type="library" name="bridj-0.7.0" level="application" />
+    <orderEntry type="library" name="webcam-capture-0.3.12" level="application" />
   </component>
 </module>

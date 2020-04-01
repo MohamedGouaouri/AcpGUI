@@ -8,7 +8,6 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import weka.core.matrix.Matrix;
 
-import java.awt.image.CropImageFilter;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;

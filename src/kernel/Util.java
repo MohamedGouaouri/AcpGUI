@@ -1,14 +1,10 @@
 package kernel;
 
-import Jama.util.Maths;
-import org.apache.commons.math.util.MathUtils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import weka.core.Utils;
 import weka.core.matrix.Matrix;
 
 import java.io.Serializable;
-import java.math.MathContext;
 import java.util.ArrayList;
 
 
