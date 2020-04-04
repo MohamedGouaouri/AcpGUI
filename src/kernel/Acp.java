@@ -75,9 +75,9 @@ public class Acp implements Serializable {
 
 
     // used to calculate the reduced dimension of the new eigenspace
-    public Matrix reduireDimensions(Matrix eigenvectors, Matrix eigenvalues){
+    public Matrix reduireDimensions(Matrix eigenvectors, Matrix eigenvalues, double percentage){
 
-        double perc = 0.9;
+        double perc = percentage;
         double trace = eigenvalues.trace();
         double s = 0;
         int i = 0;
@@ -139,7 +139,7 @@ public class Acp implements Serializable {
 
     // TODO: 16/03/2020 test this 
     // our main method used to train the model
-    public Matrix trainModel(){
+    public Matrix trainModel(double percentage){
 
         // import faces from database
         dataSet = importerImages(path);
@@ -157,7 +157,7 @@ public class Acp implements Serializable {
         Matrix eigenvalues = Util.squareDiagonal(singularValues);
 
         // the reduced eigenspace dimension
-        Matrix newBase = reduireDimensions(eigenvectors, eigenvalues);
+        Matrix newBase = reduireDimensions(eigenvectors, eigenvalues, percentage);
 
         // create the eigenspace
         eigenSpace = creerEigenSpace(newBase, newBase.getColumnDimension());

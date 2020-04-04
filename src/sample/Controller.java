@@ -3,9 +3,12 @@ package sample;
 
 import com.github.sarxos.webcam.Webcam;
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXSlider;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -23,7 +26,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import kernel.Acp;
@@ -69,6 +74,12 @@ public class Controller implements Initializable {
 
     @FXML
     private JFXButton getStatBtn;
+
+    @FXML
+    private Pane leftPane;
+
+    @FXML
+    private JFXSlider percentageValue;
 
 
     @Override
@@ -122,12 +133,11 @@ public class Controller implements Initializable {
 
     @FXML
     void trainModel(ActionEvent event) {
-        trainBtn.setDisable(true);  //this one should be outside of the thread's run method ! sinon tdir exception psk elle essaye d'accéder au javafx application thread
 
         alertMsg("Model is now training\n" +
                 "This may take about 20 seconds", Alert.AlertType.INFORMATION);
         new Thread(() -> {
-            pca.trainModel();
+            pca.trainModel(percentageValue.getValue() / 100.0);
             Platform.runLater(() -> {
                 Controller.alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.CONFIRMATION);
                 trained = true;
@@ -292,14 +302,14 @@ public class Controller implements Initializable {
     void trainOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            getHelp(null);
+            showDialog("Train model", "");
         }
     }
     @FXML
     void recognizeOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            getHelp(null);
+            showDialog("Recognize", "");
         }
     }
 
@@ -307,14 +317,14 @@ public class Controller implements Initializable {
     void saveOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            getHelp(null);
+            showDialog("Save Training", "");
         }
     }
     @FXML
     void loadOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            getHelp(null);
+            showDialog("Load Training", "");
         }
     }
 
@@ -326,6 +336,35 @@ public class Controller implements Initializable {
             case S:saveTrainState(null);break;
             case L:loadTrainState(null);break;
         }
+    }
+
+
+    @FXML
+    private StackPane backgroundStackPane;
+
+    // this method is for showing dialog message
+    public void showDialog(String heading ,String content){
+        // layout of the dialog
+        JFXDialogLayout dialogLayout = new JFXDialogLayout();
+        dialogLayout.setHeading(new Text(heading));
+        dialogLayout.setBody(new Text(content));
+
+        // create the dialog to be shown
+        JFXDialog dialog = new JFXDialog(backgroundStackPane, dialogLayout, JFXDialog.DialogTransition.CENTER);
+
+        // set the button
+        JFXButton button = new JFXButton();
+        button.setText("Close");
+        button.setStyle("-fx-text-fill: #2eabff; -fx-font-weight: bold");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                dialog.close();
+            }
+        });
+        dialogLayout.setActions(button);
+        leftPane.toBack();
+        dialog.show();
     }
 
 }
