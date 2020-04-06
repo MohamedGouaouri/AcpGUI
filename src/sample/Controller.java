@@ -39,6 +39,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.ResourceBundle;
@@ -302,14 +304,20 @@ public class Controller implements Initializable {
     void trainOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            showDialog("Train model", "");
+            showDialog("Train model", "" +
+                    "Train model is an operation must be done before the recognizing process\n" +
+                    "You can specify a threshold and percentage of precision level\n" +
+                    "Note: this operation may take up to 30 seconds (see the online documentation)");
         }
     }
     @FXML
     void recognizeOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            showDialog("Recognize", "");
+            showDialog("Recognize", "Recognition is the process of " +
+                    "testing if the input face is recognized by the system\n" +
+                    "To do so upload the input face and hid the recognition button \n" +
+                    "Note: model must be trained before");
         }
     }
 
@@ -317,14 +325,16 @@ public class Controller implements Initializable {
     void saveOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            showDialog("Save Training", "");
+            showDialog("Save Training", "Save button is used to save the configurations of the last" +
+                    "training\n" +
+                    "Once you you save the training you can load it and make recognition at any time");
         }
     }
     @FXML
     void loadOnMouseClicked(MouseEvent event) {
         MouseButton mouseButton = event.getButton();
         if (mouseButton == MouseButton.SECONDARY){
-            showDialog("Load Training", "");
+            showDialog("Load Training", "Load training helps to load the last training configuration");
         }
     }
 
@@ -356,15 +366,37 @@ public class Controller implements Initializable {
         JFXButton button = new JFXButton();
         button.setText("Close");
         button.setStyle("-fx-text-fill: #2eabff; -fx-font-weight: bold");
-        button.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
+
+        JFXButton help = new JFXButton("Go online");
+        help.setStyle("-fx-text-fill: #2eabff; -fx-font-weight: bold");
+
+        button.setOnAction(actionEvent -> dialog.close());
+
+        help.setOnAction(actionEvent -> {
+            try {
+                getOnlineHelp(new URI("www.google.com"));
                 dialog.close();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
             }
         });
-        dialogLayout.setActions(button);
+
+        dialogLayout.setActions(button, help);
         leftPane.toBack();
         dialog.show();
+    }
+
+    public void getOnlineHelp(URI uri){
+        try {
+            Desktop desktop = null;
+            if (Desktop.isDesktopSupported()) {
+                desktop = Desktop.getDesktop();
+            }
+
+            desktop.browse(uri);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
     }
 
 }
