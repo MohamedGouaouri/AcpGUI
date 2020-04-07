@@ -4,6 +4,7 @@
     <states>
       <state key="GlobalLibrariesConfigurable.UI">
         <settings>
+          <last-edited>ajt-2.9</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -15,6 +16,7 @@
       </state>
       <state key="JdkListConfigurable.UI">
         <settings>
+          <last-edited>1.8</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>

@@ -8,19 +8,21 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import weka.core.matrix.Matrix;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Serializable;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import java.io.*;
 
-//la classe java
+/*
+* this class is used for image processing in face detection in PCA
+* It contains several methods helping to convert image to matrices, resize images and greyscale them
+*/
 public class ImageMat implements Serializable {
 
     
     // construct an opencv matrix from an image
-    public static Mat imageToMatcv(String path) {
-        Imgcodecs imgcodecs = new Imgcodecs();
-        Mat matrix = imgcodecs.imread(path);
-        return matrix;
+    public static Mat imageToMatcv(String path){
+
+        return Imgcodecs.imread(path);
     }
 
     // construct javafx image from an opencv matrix
@@ -36,13 +38,13 @@ public class ImageMat implements Serializable {
     // construct weka one dimensional vector from an image
     public static Matrix imageToVector(String path){
 
-        Mat mat = imageToMatcv(path);
-        Matrix matrix = Util.matcvToMatrix(mat);
+        Matrix matrix = Util.matcvToMatrix(imageToMatcv(path));
         double[] packedArray = matrix.getRowPackedCopy();
         return new Matrix(packedArray, packedArray.length);
+
     }
 
-    // TODO: 13/03/2020 tested
+
     public static Image vectorToImage(Matrix matrix) {
         int h = 112;
         int w = 92;
@@ -62,6 +64,7 @@ public class ImageMat implements Serializable {
         return matcvToImage(Util.matrixToMatcv(out));
     }
 
+    // greyscale image in place
     public static void grayscaleImage(String path){
         Mat source = imageToMatcv(path);
         Mat destination = new Mat();
@@ -69,11 +72,17 @@ public class ImageMat implements Serializable {
         Imgcodecs.imwrite(path, destination);
     }
 
+
+    // resize image in place
     public static void resizeImage(String path){
         Mat source = imageToMatcv(path);
         Mat resized = new Mat();
         Size newSize = new Size(92, 112);
         Imgproc.resize(source, resized, newSize, Imgproc.INTER_AREA);
         Imgcodecs.imwrite(path, resized);
+    }
+
+    public static void convertToBMP(String path) throws IOException {
+        ImageIO.write(ImageIO.read(new File(path)), "BMP",  new FileOutputStream(path));
     }
 }

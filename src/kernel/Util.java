@@ -16,6 +16,7 @@ public class Util implements Serializable {
     public static Matrix getColumnVector(Matrix data, int n){
         assert n < data.getColumnDimension();
         double[] v = new double[data.getRowDimension()];
+
         for (int i = 0; i < data.getRowDimension(); i++) {
             v[i] = data.get(i, n);
         }

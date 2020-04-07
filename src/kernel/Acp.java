@@ -5,6 +5,7 @@ import weka.core.matrix.Matrix;
 import weka.core.matrix.SingularValueDecomposition;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ public class Acp implements Serializable {
     private int trainImagesNumber = 5;
     final int height = 112;
     final int width = 92;
-    private String path = "src/sample/orl/";
+    private String path = "src/sample/db/orl/";
     private final int personImages=10;
 
     private double threshold;
@@ -47,6 +48,15 @@ public class Acp implements Serializable {
             images = fd.listFiles();
             for (i = 0; i < trainImagesNumber; i++) {
                 assert images != null;
+                try{
+
+                    ImageMat.convertToBMP(images[i].getPath());
+                    ImageMat.grayscaleImage(images[i].getPath());
+                    ImageMat.resizeImage(images[i].getPath());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Matrix mat = ImageMat.imageToVector(images[i].getPath());
 
                 Util.replaceColumn(total,mat,i+j);
@@ -143,7 +153,7 @@ public class Acp implements Serializable {
 
         // import faces from database
         dataSet = importerImages(path);
-
+        System.out.println(dataSet.getColumnDimension());
         // calculate mean
         mean = calculerVisageMoyen(dataSet);
 

@@ -8,20 +8,20 @@ import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXSlider;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
+
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -43,6 +43,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -100,10 +101,26 @@ public class Controller implements Initializable {
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null){
             try{
-                facePath = selectedFile.getPath();
-                faceImage.setImage(new Image(new FileInputStream(selectedFile.getPath())));
+                // get selected file path
+                File faceFile = new File(selectedFile.getPath());
+                FileInputStream in = new FileInputStream(faceFile);
+                FileOutputStream out = new FileOutputStream("src/userPics/" + faceFile.getName());
+
+                // write image to src/userPics/ directory in bmp format
+                ImageIO.write( ImageIO.read(in), "BMP", out);
+                facePath = "src/userPics/" + faceFile.getName();
+
+                // resize and greyscale image in place
+                ImageMat.resizeImage(facePath);
+                ImageMat.grayscaleImage(facePath);
+                faceImage.setImage(new Image(new FileInputStream(facePath)));
+                in.close();
+                out.close();
             }catch (FileNotFoundException e){
                 alertMsg("File not found", Alert.AlertType.ERROR);
+
+            }catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -136,16 +153,35 @@ public class Controller implements Initializable {
     @FXML
     void trainModel(ActionEvent event) {
 
-        alertMsg("Model is now training\n" +
-                "This may take about 20 seconds", Alert.AlertType.INFORMATION);
-        new Thread(() -> {
-            pca.trainModel(percentageValue.getValue() / 100.0);
-            Platform.runLater(() -> {
-                Controller.alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.CONFIRMATION);
-                trained = true;
-                loadBtn.setDisable(true);
-            });
-        }).start();
+       if (!trained){
+           alertMsg("Model is now training\n" +
+                   "This may take about 20 seconds", Alert.AlertType.INFORMATION);
+           trainBtn.setDisable(true);
+           loadBtn.setDisable(true);
+           new Thread(() -> {
+               pca.trainModel(percentageValue.getValue() / 100.0);
+
+               Platform.runLater(() -> {
+                   Controller.alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.INFORMATION);
+                   trained = true;
+                   trainBtn.setDisable(false);
+               });
+           }).start();
+       }else {
+           Alert alert = new Alert(Alert.AlertType.WARNING, "Model was trained before do you want to retrain it ?");
+           alert.setHeaderText(null);
+           ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+           alert.getDialogPane().getButtonTypes().add(cancelButtonType);
+
+           Optional<ButtonType> result = alert.showAndWait();
+
+           if (result.isPresent() && result.get() == ButtonType.OK){
+               trained = false;
+                trainModel(event);
+           }
+       }
+
     }
 
 
@@ -155,12 +191,14 @@ public class Controller implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+
     }
 
 
     /// PCA serialization
     @FXML
     public void saveTrainState(ActionEvent event){
+
         if (!trained){
             alertMsg("You must train the model first", Alert.AlertType.ERROR);
             return;
@@ -173,10 +211,10 @@ public class Controller implements Initializable {
             pcaOut.close();
             fileOutputStream.close();
             alertMsg("your training is now saved\n second time you open this app just click on load button", Alert.AlertType.INFORMATION);
-            trainBtn.setDisable(true);
             saveTrainBtn.setDisable(true);
         }catch (Exception e){
             e.printStackTrace();
+
         }
     }
 
@@ -271,7 +309,8 @@ public class Controller implements Initializable {
                 "PERSON11", "PERSON12","PERSON13","PERSON14","PERSON15","PERSON16", "PERSON17", "PERSON18", "PERSON19", "PERSON20",
                 "PERSON21", "PERSON22","PERSON23","PERSON24","PERSON25","PERSON26", "PERSON27", "PERSON28", "PERSON29", "PERSON30",
                 "PERSON31", "PERSON32","PERSON33","PERSON34","PERSON35","PERSON36", "PERSON37", "PERSON38", "PERSON39", "PERSON40"};
-// populating axis
+
+        // populating axis
         CategoryAxis xAxis = new CategoryAxis();
 
         NumberAxis yAxis = new NumberAxis();
@@ -394,6 +433,7 @@ public class Controller implements Initializable {
             }
 
             desktop.browse(uri);
+
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
