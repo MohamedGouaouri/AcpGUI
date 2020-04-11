@@ -25,6 +25,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -34,6 +35,7 @@ import javafx.stage.Stage;
 import kernel.Acp;
 import kernel.ImageMat;
 import kernel.Result;
+import org.opencv.core.Mat;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -42,9 +44,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller implements Initializable {
 
@@ -52,7 +52,6 @@ public class Controller implements Initializable {
     private static Acp pca = new Acp(3000);
     private static HashMap<String, Number> distancesMap;
     private boolean trained = false;
-    private int eigenfacesNumber;
 
 
     @FXML
@@ -84,6 +83,9 @@ public class Controller implements Initializable {
     @FXML
     private JFXSlider percentageValue;
 
+    @FXML
+    private Label rate;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -92,35 +94,51 @@ public class Controller implements Initializable {
 
 
     @FXML
-    void loadFace(ActionEvent event) {
+    void loadFace(ActionEvent event){
 
         FileChooser fileChooser = new FileChooser();
         // TODO: 24/03/2020 Filter selected file
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("BMP", "*.bmp"));
 
-        File selectedFile = fileChooser.showOpenDialog(null);
-        if (selectedFile != null){
-            try{
-                // get selected file path
-                File faceFile = new File(selectedFile.getPath());
-                FileInputStream in = new FileInputStream(faceFile);
-                FileOutputStream out = new FileOutputStream("src/userPics/" + faceFile.getName());
+        File faceFile = fileChooser.showOpenDialog(null);
 
-                // write image to src/userPics/ directory in bmp format
-                ImageIO.write( ImageIO.read(in), "BMP", out);
-                facePath = "src/userPics/" + faceFile.getName();
+        if (faceFile != null){
+            if (!faceFile.getParentFile().getName().equals("userPics")){
 
-                // resize and greyscale image in place
-                ImageMat.resizeImage(facePath);
-                ImageMat.grayscaleImage(facePath);
-                faceImage.setImage(new Image(new FileInputStream(facePath)));
-                in.close();
-                out.close();
-            }catch (FileNotFoundException e){
-                alertMsg("File not found", Alert.AlertType.ERROR);
+                try{
+                    // get selected file path
+                    FileInputStream in = new FileInputStream(faceFile);
+                    FileOutputStream out = new FileOutputStream("src/userPics/" + faceFile.getName());
 
-            }catch (IOException e) {
-                e.printStackTrace();
+                    // write image to src/userPics/ directory in bmp format
+                    ImageIO.write( ImageIO.read(in), "BMP", out);
+                    facePath = "src/userPics/" + faceFile.getName();
+
+                    // resize and greyscale image in place
+                    ImageMat.resizeImage(facePath);
+                    ImageMat.grayscaleImage(facePath);
+                    faceImage.setImage(new Image(new FileInputStream(facePath)));
+                    in.close();
+                    out.close();
+                }catch (FileNotFoundException e){
+                    alertMsg("File not found", Alert.AlertType.ERROR);
+
+                }catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }else {
+                try {
+                    facePath = "src/userPics/" + faceFile.getName();
+
+                    // resize and greyscale image in place
+                    ImageMat.resizeImage(facePath);
+                    ImageMat.grayscaleImage(facePath);
+                    faceImage.setImage(new Image(new FileInputStream(facePath)));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
             }
         }
     }
@@ -165,6 +183,7 @@ public class Controller implements Initializable {
                    Controller.alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.INFORMATION);
                    trained = true;
                    trainBtn.setDisable(false);
+                   saveTrainBtn.setDisable(false);
                });
            }).start();
        }else {
@@ -211,7 +230,6 @@ public class Controller implements Initializable {
             pcaOut.close();
             fileOutputStream.close();
             alertMsg("your training is now saved\n second time you open this app just click on load button", Alert.AlertType.INFORMATION);
-            saveTrainBtn.setDisable(true);
         }catch (Exception e){
             e.printStackTrace();
 
@@ -228,8 +246,6 @@ public class Controller implements Initializable {
             pcaIn.close();
             fileInputStream.close();
             trained = true;
-            trainBtn.setDisable(true);
-            saveTrainBtn.setDisable(true);
             alertMsg("model is now trained you can enter face path and recognize it", Alert.AlertType.CONFIRMATION);
         }catch (Exception e){
             alertMsg("An error occurred while loading train model", Alert.AlertType.ERROR);
@@ -247,7 +263,7 @@ public class Controller implements Initializable {
                 desktop = Desktop.getDesktop();
             }
 
-            desktop.open(new File("D:\\study\\PCAUI\\docs\\index.html"));
+            desktop.open(new File("D:\\study\\myPCA\\AcpGUI\\docs\\index.html"));
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -277,8 +293,7 @@ public class Controller implements Initializable {
         webcam.open();
         BufferedImage bufferedImageTaken = webcam.getImage();
         ImageIO.write(bufferedImageTaken, "BMP", new File("src/userPics/image.bmp"));
-        ImageMat.resizeImage("src/userPics/image.bmp");
-        ImageMat.grayscaleImage("src/userPics/image.bmp");
+
         picTaken.setImage(new Image(new FileInputStream("src/userPics/image.bmp")));
         webcam.close();
     }
@@ -333,9 +348,10 @@ public class Controller implements Initializable {
             barChart.setBarGap(2);
             chartPane.getChildren().add(barChart);
             barChart.setStyle("CHART_COLOR_1: rgb(2,0,94);");
+
         }catch (Exception e){
             alertMsg("You must make recognition first", Alert.AlertType.WARNING);
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -439,4 +455,38 @@ public class Controller implements Initializable {
         }
     }
 
+    public Map<Result,Integer> getRate(String path)
+    {
+        HashMap<Result,Integer> a = new HashMap<Result,Integer>();
+        File dir=new File(path);
+        int i ;
+        int j = 0;
+        File[] images;
+        for (File fd : dir.listFiles()) {
+            images = fd.listFiles();
+            for (i = 0; i < pca.getTrainImagesNumber(); i++) {
+                assert images != null;
+                Result actuel = pca.recognize(images[i].getPath());
+                if (a.containsKey(actuel))
+                    a.put(actuel , a.get(actuel)+1);
+                else
+                    a.put(actuel,1);
+            }
+        }
+        System.out.println(a.get(Result.RECONNUE));
+        System.out.println("Rate "+Math.floorDiv(a.get(Result.RECONNUE)*100 , pca.getTotalTrainImagesNumber()));
+        return a;
+    }
+
+
+    @FXML
+    void getRate(ActionEvent event) {
+        try{
+            double rateValue = Math.floorDiv(getRate("src/sample/db/orl/").get(Result.RECONNUE) * 100, pca.getTotalTrainImagesNumber());
+            rate.setText(String.valueOf(rateValue));
+        }catch (Exception e){
+            alertMsg("Model must be trained before", Alert.AlertType.ERROR);
+            //e.printStackTrace();
+        }
+    }
 }

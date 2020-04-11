@@ -15,8 +15,8 @@ public class Acp implements Serializable {
 
     private int totalTrainImagesNumber = 200;
     private int trainImagesNumber = 5;
-    final int height = 112;
-    final int width = 92;
+    static final int height = 112;
+    static final int width = 92;
     private String path = "src/sample/db/orl/";
     private final int personImages=10;
 
@@ -245,5 +245,15 @@ public class Acp implements Serializable {
         return eigenSpace;
     }
 
+    public int getTrainImagesNumber() {
+        return trainImagesNumber;
+    }
 
+    public int getPersonImages() {
+        return personImages;
+    }
+
+    public int getTotalTrainImagesNumber() {
+        return totalTrainImagesNumber;
+    }
 }
