@@ -482,6 +482,7 @@ public class Controller implements Initializable {
     @FXML
     void getRate(ActionEvent event) {
         try{
+            pca.setThreshold(thresholdSlider.getValue());
             double rateValue = Math.floorDiv(getRate("src/sample/db/orl/").get(Result.RECONNUE) * 100, pca.getTotalTrainImagesNumber());
             rate.setText(String.valueOf(rateValue));
         }catch (Exception e){
