@@ -1,16 +1,17 @@
 package kernel;
 
 import javafx.scene.image.Image;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 import weka.core.matrix.Matrix;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /*
 * this class is used for image processing in face detection in PCA
@@ -21,7 +22,6 @@ public class ImageMat implements Serializable {
     
     // construct an opencv matrix from an image
     public static Mat imageToMatcv(String path){
-
         return Imgcodecs.imread(path);
     }
 
@@ -77,12 +77,24 @@ public class ImageMat implements Serializable {
     public static void resizeImage(String path){
         Mat source = imageToMatcv(path);
         Mat resized = new Mat();
-        Size newSize = new Size(92, 112);
+        Size newSize = new Size(Acp.width, Acp.height);
         Imgproc.resize(source, resized, newSize, Imgproc.INTER_AREA);
         Imgcodecs.imwrite(path, resized);
     }
 
     public static void convertToBMP(String path) throws IOException {
         ImageIO.write(ImageIO.read(new File(path)), "BMP",  new FileOutputStream(path));
+    }
+
+
+    public static MatOfRect detectFaces(String path, String HaarCascadePath) {
+
+        CascadeClassifier faceDetector = new CascadeClassifier(HaarCascadePath);
+        Mat imagecv = Imgcodecs.imread(path);
+        MatOfRect facesVector = new MatOfRect();
+        faceDetector.detectMultiScale(imagecv, facesVector);
+        System.out.println(facesVector.toArray().length);
+
+        return facesVector;
     }
 }

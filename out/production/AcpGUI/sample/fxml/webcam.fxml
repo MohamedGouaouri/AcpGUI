@@ -4,9 +4,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="269.0" prefWidth="386.0" stylesheets="@../../assets/css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane prefHeight="269.0" prefWidth="386.0" stylesheets="@../../assets/css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.CameraController">
    <children>
-      <JFXButton layoutX="100.0" layoutY="214.0" onAction="#takeCamPicture" prefHeight="29.0" prefWidth="178.0" styleClass="leftBtns" text="Take" textFill="WHITE" />
-      <ImageView fx:id="picTaken" fitHeight="180.0" fitWidth="190.0" layoutX="91.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true" />
+      <JFXButton fx:id="takeBtn" layoutX="100.0" layoutY="214.0" onAction="#takeCamPicture" prefHeight="29.0" prefWidth="178.0" styleClass="leftBtns" text="Take" textFill="WHITE" />
+      <ImageView fx:id="picTaken" fitHeight="199.0" fitWidth="264.0" layoutX="59.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true" />
    </children>
 </AnchorPane>

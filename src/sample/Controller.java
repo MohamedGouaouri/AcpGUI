@@ -19,6 +19,7 @@ import javafx.scene.control.*;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -270,6 +271,7 @@ public class Controller implements Initializable {
 
     }
 
+
     @FXML
     void takePicture(ActionEvent event) throws IOException {
         Parent camera = FXMLLoader.load(getClass().getResource("fxml/webcam.fxml"));
@@ -280,22 +282,6 @@ public class Controller implements Initializable {
         stage.getIcons().add(new Image(new FileInputStream("src/assets/images/icons/photograph.png")));
         stage.setScene(scene);
         stage.show();
-    }
-
-
-    // take picture section
-    @FXML
-    private ImageView picTaken;
-
-    @FXML
-    void takeCamPicture(ActionEvent event) throws IOException {
-        Webcam webcam = Webcam.getDefault();
-        webcam.open();
-        BufferedImage bufferedImageTaken = webcam.getImage();
-        ImageIO.write(bufferedImageTaken, "BMP", new File("src/userPics/image.bmp"));
-
-        picTaken.setImage(new Image(new FileInputStream("src/userPics/image.bmp")));
-        webcam.close();
     }
 
 
