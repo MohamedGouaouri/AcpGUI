@@ -19,7 +19,6 @@ public class Acp implements Serializable {
     final static int width = 92;
     private String path = "src/sample/db/orl/";
     private final int personImages=10;
-
     private double threshold;
     private Matrix dataSet;
     private Matrix centers;

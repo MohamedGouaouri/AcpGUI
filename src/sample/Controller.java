@@ -1,7 +1,6 @@
 package sample;
 
 
-import com.github.sarxos.webcam.Webcam;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
@@ -225,7 +224,7 @@ public class Controller implements Initializable {
         }
 
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("pca.ser");
+            FileOutputStream fileOutputStream = new FileOutputStream("config/pca.ser");
             ObjectOutputStream pcaOut = new ObjectOutputStream(fileOutputStream);
             pcaOut.writeObject(pca);
             pcaOut.close();
@@ -241,7 +240,7 @@ public class Controller implements Initializable {
     public void loadTrainState(ActionEvent event){
 
         try {
-            FileInputStream fileInputStream = new FileInputStream("pca.ser");
+            FileInputStream fileInputStream = new FileInputStream("config/pca.ser");
             ObjectInputStream pcaIn = new ObjectInputStream(fileInputStream);
             pca = (Acp) pcaIn.readObject();
             pcaIn.close();
@@ -304,6 +303,9 @@ public class Controller implements Initializable {
     private Pane chartPane;
 
 
+
+
+
     @FXML
     public void getStatistics(ActionEvent actionEvent){
         String[] persons = {"PERSON1", "PERSON2","PERSON3","PERSON4","PERSON5","PERSON6", "PERSON7", "PERSON8", "PERSON9", "PERSON10",
@@ -325,9 +327,8 @@ public class Controller implements Initializable {
         XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
         try{
 
-            for (int i = 0; i < persons.length; i++) {
-                series.getData().add(new XYChart.Data<>(persons[i], distancesMap.get(persons[i])));
-
+            for (String person : persons) {
+                series.getData().add(new XYChart.Data<>(person, distancesMap.get(person)));
             }
             // add data to bar chart
             barChart.getData().add(series);
@@ -441,9 +442,15 @@ public class Controller implements Initializable {
         }
     }
 
-    public Map<Result,Integer> getRate(String path)
+
+    public static Map<Result,Integer> getRate(String path, double thresholdValue)
     {
+        pca.setThreshold(thresholdValue);
         HashMap<Result,Integer> a = new HashMap<Result,Integer>();
+        a.put(Result.RECONNUE, 0);
+        a.put(Result.CONFUSION, 0);
+        a.put(Result.REJETE, 0);
+
         File dir=new File(path);
         int i ;
         int j = 0;
@@ -453,27 +460,35 @@ public class Controller implements Initializable {
             for (i = 0; i < pca.getTrainImagesNumber(); i++) {
                 assert images != null;
                 Result actuel = pca.recognize(images[i].getPath());
-                if (a.containsKey(actuel))
-                    a.put(actuel , a.get(actuel)+1);
-                else
-                    a.put(actuel,1);
+                a.put(actuel , a.get(actuel)+1);
             }
         }
-        System.out.println(a.get(Result.RECONNUE));
-        System.out.println("Rate "+Math.floorDiv(a.get(Result.RECONNUE)*100 , pca.getTotalTrainImagesNumber()));
+
         return a;
     }
 
 
+
     @FXML
-    void getRate(ActionEvent event) {
-        try{
-            pca.setThreshold(thresholdSlider.getValue());
-            double rateValue = Math.floorDiv(getRate("src/sample/db/orl/").get(Result.RECONNUE) * 100, pca.getTotalTrainImagesNumber());
-            rate.setText(String.valueOf(rateValue));
-        }catch (Exception e){
-            alertMsg("Model must be trained before", Alert.AlertType.ERROR);
-            //e.printStackTrace();
-        }
+    void getPerformance(ActionEvent event) throws IOException {
+        Parent performance = FXMLLoader.load(getClass().getResource("fxml/performance.fxml"));
+        Scene scene = new Scene(performance);
+        Stage stage = new Stage();
+        stage.setResizable(false);
+        stage.setTitle("Statistics");
+        stage.getIcons().add(new Image(new FileInputStream("src/assets/images/icons/graph.png")));
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public static Acp getPCA(){
+        return pca;
+    }
+    public boolean isTrained(){
+        return trained;
+    }
+
+    public  HashMap<String, Number> getDistancesMap(){
+        return distancesMap;
     }
 }
