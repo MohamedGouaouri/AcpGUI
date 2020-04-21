@@ -1,1 +1,7 @@
 libs/
+src/sample/assets/
+src/sample/db/orl/
+.idea/
+config/
+out/
+AcpGUI.iml
