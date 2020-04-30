@@ -26,6 +26,7 @@ public class Acp implements Serializable {
     private Matrix mean;
     private EigenSpace eigenSpace;
     public HashMap<String, Number> distancesMap = new HashMap<>();
+    private boolean dataBaseImported = false;
 
 
     public Acp(double threshold){
@@ -151,7 +152,10 @@ public class Acp implements Serializable {
     public Matrix trainModel(double percentage){
 
         // import faces from database
-        dataSet = importerImages(path);
+        if (!dataBaseImported){
+            dataSet = importerImages(path);
+            dataBaseImported = true;
+        }
         System.out.println(dataSet.getColumnDimension());
         // calculate mean
         mean = calculerVisageMoyen(dataSet);
@@ -193,7 +197,6 @@ public class Acp implements Serializable {
 
         // project the inputFaceMatrix onto the eigen space
         Matrix projectedInputFaceMatrix = projectData(eigenSpace, inputFaceMatrix);
-        
 
         // calculate distances
         ArrayList<Double> distances = new ArrayList<>();
@@ -201,9 +204,6 @@ public class Acp implements Serializable {
 
             distances.add(eigenSpace.getDistance(Util.getColumnVector(projectedCenters, i), projectedInputFaceMatrix));
         }
-
-
-
         Iterator<Double> iterator1 = distances.iterator();
         int i = 0;
         File directory = new File(this.path);
@@ -212,9 +212,7 @@ public class Acp implements Serializable {
             String[] dirList = directory.list();
             distancesMap.put(dirList[i], value);
             i++;
-
         }
-
         int foundFaces = 0;
         Iterator<Double> iterator2 = distances.iterator();
         while (iterator2.hasNext()){
@@ -229,7 +227,6 @@ public class Acp implements Serializable {
             return Result.RECONNUE;
         }
         return Result.CONFUSION;
-
     }
 
     public double getThreshold() {

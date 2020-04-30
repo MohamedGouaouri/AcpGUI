@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import kernel.Acp;
 import kernel.ImageMat;
 import kernel.Result;
+import kernel.Util;
 import org.opencv.core.Mat;
 
 import javax.imageio.ImageIO;
@@ -83,8 +84,6 @@ public class Controller implements Initializable {
     @FXML
     private JFXSlider percentageValue;
 
-    @FXML
-    private Label rate;
 
 
     @Override
@@ -114,9 +113,6 @@ public class Controller implements Initializable {
                     ImageIO.write( ImageIO.read(in), "BMP", out);
                     facePath = "src/userPics/" + faceFile.getName();
 
-                    // resize and greyscale image in place
-                    ImageMat.resizeImage(facePath);
-                    ImageMat.grayscaleImage(facePath);
                     faceImage.setImage(new Image(new FileInputStream(facePath)));
                     in.close();
                     out.close();
@@ -467,7 +463,35 @@ public class Controller implements Initializable {
         return a;
     }
 
+    @FXML
+    void detectFaces(ActionEvent event) {
+        if (facePath == null){
+            alertMsg("You must upload un image first", Alert.AlertType.ERROR);
+        }else {
+            // Detect faces
+            HashMap result = Util.detectFaces(facePath);
+            int detected_faces_number = (int) result.values().toArray()[0];
+            if (detected_faces_number == 0){
+                alertMsg("No face detected", Alert.AlertType.WARNING);
+            }
+            else {
+                alertMsg(detected_faces_number + " faces detected", Alert.AlertType.INFORMATION);
+                faceImage.setImage(ImageMat.matcvToImage((Mat) result.keySet().toArray()[0]));
+            }
+        }
+    }
 
+    @FXML
+    void convert(ActionEvent event) throws IOException {
+        Parent stat = FXMLLoader.load(getClass().getResource("fxml/converter.fxml"));
+        Scene scene = new Scene(stat);
+        Stage stage = new Stage();
+        stage.setResizable(false);
+        stage.setTitle("Statistics");
+        stage.getIcons().add(new Image(new FileInputStream("src/assets/images/icons/graph.png")));
+        stage.setScene(scene);
+        stage.show();
+    }
 
     @FXML
     void getPerformance(ActionEvent event) throws IOException {
@@ -484,11 +508,5 @@ public class Controller implements Initializable {
     public static Acp getPCA(){
         return pca;
     }
-    public boolean isTrained(){
-        return trained;
-    }
 
-    public  HashMap<String, Number> getDistancesMap(){
-        return distancesMap;
-    }
 }

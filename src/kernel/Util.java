@@ -1,11 +1,15 @@
 package kernel;
 
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 import weka.core.matrix.Matrix;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 // Util class is used for general purpose operations
@@ -98,6 +102,32 @@ public class Util implements Serializable {
         }
         out.timesEquals(div);
         return out;
+    }
+
+    public static HashMap detectFaces(String path){
+        Map<Mat, Integer> result = new HashMap<>();
+        CascadeClassifier faceDetector = new CascadeClassifier("libs/facedetector/haarcascade_frontalface_alt.xml");
+        Mat image = Imgcodecs.imread(path); // enter the path for reading
+
+        MatOfRect face_Detections = new MatOfRect();
+        faceDetector.detectMultiScale(image, face_Detections);
+        //System.out.println((face_Detections.toArray().length));
+        Rect crop = null;
+        int i = 1;
+        for (Rect rect : face_Detections.toArray()) {
+            Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height),
+                    new Scalar(0, 255, 0));
+            crop = new Rect(rect.x, rect.y, rect.width, rect.height);
+            Mat image_roi = new Mat(image, crop);
+            Imgcodecs.imwrite("src/userPics/face" + i + ".bmp", image_roi); //enter the path for saving
+
+            // greyscale and resize
+            ImageMat.resizeImage("src/userPics/face" + i + ".bmp");
+            ImageMat.grayscaleImage("src/userPics/face" + i + ".bmp");
+            i++;
+        }
+        result.put(image, face_Detections.toList().size());
+        return (HashMap) result;
     }
 
 }
